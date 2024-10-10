@@ -47,6 +47,8 @@ func HTTPAPIServer() {
 	if Storage.ServerHTTPDemo() {
 		public.LoadHTMLGlob(Storage.ServerHTTPDir() + "/templates/*")
 		public.GET("/", HTTPAPIServerIndex)
+		public.Any("/login", HTTPServerLogin)
+		public.Any("/test", HTTPTest)
 		public.GET("/pages/stream/list", HTTPAPIStreamList)
 		public.GET("/pages/stream/add", HTTPAPIAddStream)
 		public.GET("/pages/stream/edit/:uuid", HTTPAPIEditStream)
@@ -152,6 +154,43 @@ func HTTPAPIServer() {
 		os.Exit(1)
 	}
 
+}
+
+func HTTPTest(c *gin.Context) {
+	res, err:= test()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error":err.Error()})
+	}
+	c.JSON(http.StatusOK, gin.H{"data":res})
+}
+
+func HTTPServerLogin(c *gin.Context) {
+	if c.Request.Method == http.MethodGet {
+		c.HTML(http.StatusOK, "login.tmpl", gin.H{
+			"port":		Storage.ServerHTTPPort(),
+			"streams": 	Storage.Streams,
+			"version": 	time.Now().String(),
+			"page":    	"login",
+		})		
+	}
+	
+    username := c.PostForm("username")
+    password := c.PostForm("password")
+
+    // Validate user credentials (this is just a placeholder)
+    if username == "admin" && password == "password" {
+        // Generate JWT token
+        token, err := generateJWT(username)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+
+        // Respond with the JWT token
+        c.JSON(http.StatusOK, gin.H{"token": token})
+    } else {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+    }
 }
 
 // HTTPAPIServerIndex index file

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <title>Quản lý camera</title>
+  <link rel="stylesheet" href="/../static/plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="/../static/css/adminlte.min.css">
+  <link rel="stylesheet" href="/../static/plugins/sweetalert2/sweetalert2.min.css">
+  <link rel="stylesheet" href="/../static/css/index.css">
+  <link href="/../static/css/google-fonts.css" rel="stylesheet">
+</head>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <h1>Vui lòng đăng nhập</h1>
+                <form action="/login" method="post">
+                    <div class="form-group">
+                        <label for="username">Tên người dùng:</label>
+                        <input type="text" id="username" name="username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mật khẩu:</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    <input type="submit" value="Đăng nhập" class="btn btn-primary">
+                </form>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</div><!-- /.content -->
