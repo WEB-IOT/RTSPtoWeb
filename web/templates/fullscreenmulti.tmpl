@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-  <title>RTSPtoWEB</title>
+  <title>Quản lý camera</title>
   <link rel="stylesheet" href="/../static/plugins/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="/../static/css/adminlte.min.css">
   <link rel="stylesheet" href="/../static/plugins/sweetalert2/sweetalert2.min.css">
@@ -92,7 +92,7 @@
               </ul>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/" role="button"><i class="fas fa-times"></i> Close</a>
+              <a class="nav-link" href="/" role="button"><i class="fas fa-times"></i> Đóng</a>
             </li>
             {{end}}
           </ul>
@@ -260,8 +260,8 @@
               <video class="video-class empty" autoplay muted playsinline></video>
             ` +
         `<a class="remove-btn" onclick="destoyPlayer(` + i + `)"><i class="fas fa-times"></i></a>` +
-        `<a class="add-stream-btn" onclick="openChoise(this)"><i class="fas fa-plus"></i><br />Click to select stream</a>` +
-        `<a href="#" class="btn  btn-info btn-xs btn-play-main d-none"  onclick="playMainStream(this)"><i class="fas fa-expand"></i> Expand</a>` +
+        `<a class="add-stream-btn" onclick="openChoise(this)"><i class="fas fa-plus"></i><br />Ấn để chọn luồng camera</a>` +
+        `<a href="#" class="btn  btn-info btn-xs btn-play-main d-none"  onclick="playMainStream(this)"><i class="fas fa-expand"></i> Mở rộng</a>` +
         `<img class="loader d-none" src="/../static/img/loader.svg" />` +
         `</div>`);
     }

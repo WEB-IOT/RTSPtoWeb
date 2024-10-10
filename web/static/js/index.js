@@ -68,13 +68,13 @@ function showEditStream(uuid) {
 function deleteStream(uuid) {
   activeStream = uuid;
   Swal.fire({
-    title: 'Are you sure?',
-    text: "Do you want delete stream " + streams[uuid].name + " ?",
+    title: 'Xác nhận ?',
+    text: "Bạn có muốn xóa luồng " + streams[uuid].name + " ?",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, delete it!'
+    confirmButtonText: 'Xóa'
   }).then((result) => {
     if (result.value) {
       goRequest('delete', uuid)
@@ -120,8 +120,8 @@ function goRequest(method, uuid, data) {
   if (path == '') {
     Swal.fire({
       icon: 'error',
-      title: 'Oops...',
-      text: 'It`s goRequest function mistake',
+      title: 'Lỗi',
+      text: 'Lỗi máy chủ',
       confirmButtonText: 'Close',
 
     })
@@ -154,16 +154,16 @@ function goRequestHandle(method, response, uuid) {
       if (response.status == 1) {
         renewStreamlist();
         Swal.fire(
-          'Added!',
-          'Your stream has been Added.',
+          'Đã thêm',
+          'Camera đã được thêm thành công',
           'success'
         );
 
       } else {
         Swal.fire({
           icon: 'error',
-          title: 'Oops...',
-          text: 'Same mistake issset',
+          title: 'Lỗi',
+          text: 'Vui lòng kiểm tra lại, đã có lỗi',
         })
       }
 
@@ -172,15 +172,15 @@ function goRequestHandle(method, response, uuid) {
       if (response.status == 1) {
         renewStreamlist();
         Swal.fire(
-          'Success!',
-          'Your stream has been modified.',
+          'Thành công!',
+          'Đẫ cập nhật thông tin thành công',
           'success'
         );
       } else {
         Swal.fire({
           icon: 'error',
-          title: 'Oops...',
-          text: 'Same mistake issset',
+          title: 'Lỗi',
+          text: 'Vui lòng kiểm tra lại, đã có lỗi',
         })
       }
       break;
@@ -191,8 +191,8 @@ function goRequestHandle(method, response, uuid) {
         delete(streams[uuid]);
         $('#stream-counter').html(Object.keys(streams).length);
         Swal.fire(
-          'Deleted!',
-          'Your stream has been deleted.',
+          'Đã xóa!',
+          'Đã xóa luồng camera',
           'success'
         )
       }
@@ -307,12 +307,12 @@ function streamHtmlTemplate(uuid, name) {
     '<i class="fas fa-ellipsis-v"></i>' +
     '</a>' +
     '<div class="dropdown-menu">' +
-    '<a class="dropdown-item" onclick="rtspPlayer.livePlayer(\'hls\', \'' + uuid + '\')" href="#">Play HLS</a>' +
-    '<a class="dropdown-item" onclick="rtspPlayer.livePlayer(\'mse\', \'' + uuid + '\')" href="#">Play MSE</a>' +
-    '<a class="dropdown-item" onclick="rtspPlayer.livePlayer(\'webrtc\', \'' + uuid + '\')" href="#">Play WebRTC</a>' +
+    '<a class="dropdown-item" onclick="rtspPlayer.livePlayer(\'hls\', \'' + uuid + '\')" href="#">Định dạng HLS</a>' +
+    '<a class="dropdown-item" onclick="rtspPlayer.livePlayer(\'mse\', \'' + uuid + '\')" href="#">Định dạng MSE</a>' +
+    '<a class="dropdown-item" onclick="rtspPlayer.livePlayer(\'webrtc\', \'' + uuid + '\')" href="#">Định dạng WebRTC</a>' +
     '<div class="dropdown-divider"></div>' +
-    '<a class="dropdown-item" onclick="showEditStream(\'' + uuid + '\')" href="#">Edit</a>' +
-    '<a class="dropdown-item" onclick="deleteStream(\'' + uuid + '\')" href="#">Delete</a>' +
+    '<a class="dropdown-item" onclick="showEditStream(\'' + uuid + '\')" href="#">Chỉnh sửa</a>' +
+    '<a class="dropdown-item" onclick="deleteStream(\'' + uuid + '\')" href="#">Xóa</a>' +
     '</div>' +
     '</div>' +
     '</div>' +
@@ -466,7 +466,7 @@ function chanellTemplate() {
     <div class="col-12">
       <div class="card card-secondary">
         <div class="card-header">
-          <h3 class="card-title">Sub channel<small> parameters</small></h3>
+          <h3 class="card-title">Kênh phụ</h3>
           <div class="card-tools">
           <button type="button" class="btn btn-tool" onclick="removeChannelDiv(this)"><i class="fas fa-times"></i></button>
           </div>
@@ -474,25 +474,25 @@ function chanellTemplate() {
           <div class="card-body">
           <form class="stream-form">
             <div class="form-group">
-              <label for="exampleInputPassword1">Substream url</label>
-              <input type="text" name="stream-url" class="form-control"  placeholder="Enter stream url" >
-              <small  class="form-text text-muted">Enter rtsp address as instructed by your camera. Look like <code>rtsp://&lt;ip&gt;:&lt;port&gt;/path </code> </small>
+              <label for="exampleInputPassword1">Link RTSP</label>
+              <input type="text" name="stream-url" class="form-control"  placeholder="Nhập link RTSP" >
+              <small  class="form-text text-muted">Nhập đường dẫn RTSP của camera, ví dụ như <code>rtsp://&lt;ip&gt;:&lt;port&gt;/path </code> </small>
             </div>
             <div class="form-group">
-              <label for="inputStatus">Substream type</label>
+              <label for="inputStatus">Lựa chọn chế độ</label>
               <select class="form-control custom-select" name="stream-ondemand" >
-                <option selected disabled><small>Select One</small></option>
-                <option value="1">On demand only</option>
-                <option value="0">Persistent connection</option>
+                <option selected disabled><small>Chọn một</small></option>
+                <option value="1">Load khi có người xem</option>
+                <option value="0">Giữ kết nối (ổn định hơn)</option>
               </select>
-              <small  class="form-text text-muted">On persistent connection, the server get data from the camera continuously. On demand, the server get data from the camera only when you click play button </small>
+              <small  class="form-text text-muted">Chế độ khi có người xem sẽ chỉ chuyển đổi stream khi có người chủ động xem, chế độ giữ kết nối sẽ luôn giữ kết nối với camera</small>
             </div>
             <div class="form-group">
               <div class="custom-control custom-switch">
                 <input type="checkbox" class="custom-control-input" name="debug" id="substream-debug-switch-` + random + `" >
-                <label class="custom-control-label" for="substream-debug-switch-` + random + `">Enable debug</label>
+                <label class="custom-control-label" for="substream-debug-switch-` + random + `">Cho phép debug</label>
               </div>
-              <small  class="form-text text-muted">Select this options if you want get more data about the stream </small>
+              <small  class="form-text text-muted">Không chọn nếu bạn là người dùng (dành cho developer)</small>
             </div>
               </form>
           </div>
