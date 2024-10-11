@@ -16,6 +16,7 @@ type MySqlConfig struct {
 
 type Config struct {
 	mysqlConfig MySqlConfig
+	MainServerEndpoint string
 }
 
 func LoadConfig() (*Config, error) {
@@ -27,6 +28,7 @@ func LoadConfig() (*Config, error) {
 			Port: os.Getenv("MYSQL_PORT"),
 			Database: os.Getenv("MYSQL_DB"),
 		},
+		MainServerEndpoint: os.Getenv("MAIN_SERVER_ENDPOINT"),
 	}
 
 	return cfg, nil

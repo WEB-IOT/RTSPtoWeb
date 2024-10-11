@@ -9,19 +9,18 @@ import (
 )
 
 func init() {
-    err := godotenv.Load(".env")
-    if err != nil {
+	err := godotenv.Load(".env")
+	if err != nil {
 		log.Fatal(err)
-        log.Fatal("Error loading .env file")
-    }
+		log.Fatal("Error loading .env file")
+	}
 }
 
-
 func generateJWT(username string) (string, error) {
-    var jwtSecret = []byte("SecretYouShouldHide")
-    if string(jwtSecret) == "" {
-        return "", fmt.Errorf("JWT secret not set in .env")
-    }
+	var jwtSecret = []byte("SecretYouShouldHide")
+	if string(jwtSecret) == "" {
+		return "", fmt.Errorf("JWT secret not set in .env")
+	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
 
@@ -37,4 +36,3 @@ func generateJWT(username string) (string, error) {
 
 	return tokenString, nil
 }
-

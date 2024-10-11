@@ -16,7 +16,9 @@ func init() {
 		panic(err.Error())
 	}
 
-	log.Print(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+	log.Printf("Connecting to database: ")
+
+	log.Printf(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 		cfg.mysqlConfig.Username,
 		cfg.mysqlConfig.Password,
 		cfg.mysqlConfig.URL,

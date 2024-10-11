@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"io"
+	"bytes"
 
 	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
@@ -157,40 +159,54 @@ func HTTPAPIServer() {
 }
 
 func HTTPTest(c *gin.Context) {
-	res, err:= test()
+	log.Info(c.Query("username"))
+	res, err := getUserByName(c.Query("username"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data":res})
+	c.JSON(http.StatusOK, gin.H{"data": res})
 }
 
 func HTTPServerLogin(c *gin.Context) {
+
+	// Handle GET
 	if c.Request.Method == http.MethodGet {
 		c.HTML(http.StatusOK, "login.tmpl", gin.H{
-			"port":		Storage.ServerHTTPPort(),
-			"streams": 	Storage.Streams,
-			"version": 	time.Now().String(),
-			"page":    	"login",
-		})		
+			"port":    Storage.ServerHTTPPort(),
+			"streams": Storage.Streams,
+			"version": time.Now().String(),
+			"page":    "login",
+		})
+		return
 	}
-	
-    username := c.PostForm("username")
-    password := c.PostForm("password")
 
-    // Validate user credentials (this is just a placeholder)
-    if username == "admin" && password == "password" {
-        // Generate JWT token
-        token, err := generateJWT(username)
-        if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-            return
-        }
+	// Handle POST
 
-        // Respond with the JWT token
-        c.JSON(http.StatusOK, gin.H{"token": token})
-    } else {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-    }
+	// Get request body
+	req, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cant parse request data"})
+		return
+	}
+
+	reader := bytes.NewReader(req)
+
+	//  Forward the request data to main server
+	res, err := http.DefaultClient.Post(cfg.MainServerEndpoint, "application/json", reader)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to contact main server"})
+		return 
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response from main server"})
+		return
+	}
+
+	c.Data(res.StatusCode, res.Header.Get("Content-Type"), body) 
 }
 
 // HTTPAPIServerIndex index file

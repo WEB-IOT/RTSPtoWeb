@@ -6,14 +6,25 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/deepch/RTSPtoWeb/config"
+
 	"github.com/sirupsen/logrus"
 )
+
+var cfg *config.Config
 
 func main() {
 	log.WithFields(logrus.Fields{
 		"module": "main",
 		"func":   "main",
 	}).Info("Server CORE start")
+
+	var err error
+	cfg, err = config.LoadConfig()
+	if err != nil {
+		panic("Can't load server config")
+	}
+
 	go HTTPAPIServer()
 	go RTSPServer()
 	go Storage.StreamChannelRunAll()
