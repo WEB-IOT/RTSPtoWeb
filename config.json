@@ -1,7 +1,7 @@
 {
   "channel_defaults": {},
   "server": {
-    "debug": true,
+    "debug": false,
     "http_debug": false,
     "http_demo": true,
     "http_dir": "web",

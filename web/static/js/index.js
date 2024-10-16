@@ -65,6 +65,24 @@ function showEditStream(uuid) {
   console.log(streams[uuid]);
 }
 
+function logout() {
+  Swal.fire({
+    title: 'Bạn có chắc chắn muốn đăng xuất?',
+    text: "Bạn sẽ bị đưa về trang đăng nhập.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Đăng xuất',
+    cancelButtonText: 'Hủy'
+  }).then((result) => {
+    if (result.value) {
+      document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      window.location.href = '/login';
+    } 
+  });
+}
+
 function deleteStream(uuid) {
   activeStream = uuid;
   Swal.fire({
@@ -529,3 +547,4 @@ function logger() {
   }
   console.log('%c%s', colors[arguments[0]], new Date().toLocaleString() + " " + [].slice.call(arguments).join('|'))
 }
+

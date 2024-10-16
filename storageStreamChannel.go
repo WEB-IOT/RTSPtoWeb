@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/deepch/vdk/av"
@@ -376,6 +377,9 @@ func (obj *StorageST) HLSMuxerM3U8(uuid string, channelID string, msn, part int)
 	obj.mutex.Unlock()
 	if ok {
 		if channelTmp, ok := tmp.Channels[channelID]; ok {
+			if channelTmp.hlsMuxer == nil {
+				return "", fmt.Errorf("hlsMuxer is not initialized")
+			}
 			index, err := channelTmp.hlsMuxer.GetIndexM3u8(msn, part)
 			return index, err
 		}

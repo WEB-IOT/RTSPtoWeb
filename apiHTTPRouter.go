@@ -1,14 +1,19 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
-	"io"
-	"bytes"
+
+	"github.com/deepch/RTSPtoWeb/middleware"
 
 	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,34 +40,32 @@ func HTTPAPIServer() {
 		public = gin.Default()
 	}
 
+	public.Use(gin.Recovery())
+
 	public.Use(CrossOrigin())
 	//Add private login password protect methods
 	privat := public.Group("/")
-	if Storage.ServerHTTPLogin() != "" && Storage.ServerHTTPPassword() != "" {
-		privat.Use(gin.BasicAuth(gin.Accounts{Storage.ServerHTTPLogin(): Storage.ServerHTTPPassword()}))
-	}
+	// if Storage.ServerHTTPLogin() != "" && Storage.ServerHTTPPassword() != "" {
+	// 	privat.Use(gin.BasicAuth(gin.Accounts{Storage.ServerHTTPLogin(): Storage.ServerHTTPPassword()}))
+	// }
 
-	/*
-		Static HTML Files Demo Mode
-	*/
+	privat.Use(middleware.AuthHandler())
 
-	if Storage.ServerHTTPDemo() {
-		public.LoadHTMLGlob(Storage.ServerHTTPDir() + "/templates/*")
-		public.GET("/", HTTPAPIServerIndex)
-		public.Any("/login", HTTPServerLogin)
-		public.Any("/test", HTTPTest)
-		public.GET("/pages/stream/list", HTTPAPIStreamList)
-		public.GET("/pages/stream/add", HTTPAPIAddStream)
-		public.GET("/pages/stream/edit/:uuid", HTTPAPIEditStream)
-		public.GET("/pages/player/hls/:uuid/:channel", HTTPAPIPlayHls)
-		public.GET("/pages/player/mse/:uuid/:channel", HTTPAPIPlayMse)
-		public.GET("/pages/player/webrtc/:uuid/:channel", HTTPAPIPlayWebrtc)
-		public.GET("/pages/multiview", HTTPAPIMultiview)
-		public.Any("/pages/multiview/full", HTTPAPIFullScreenMultiView)
-		public.GET("/pages/documentation", HTTPAPIServerDocumentation)
-		public.GET("/pages/player/all/:uuid/:channel", HTTPAPIPlayAll)
-		public.StaticFS("/static", http.Dir(Storage.ServerHTTPDir()+"/static"))
-	}
+	public.LoadHTMLGlob(Storage.ServerHTTPDir() + "/templates/*")
+	public.Any("/login", HTTPServerLogin)
+	privat.GET("/", HTTPAPIServerIndex)
+	privat.Any("/test", HTTPTest)
+	privat.GET("/pages/stream/list", HTTPAPIStreamList)
+	privat.GET("/pages/stream/add", HTTPAPIAddStream)
+	privat.GET("/pages/stream/edit/:uuid", HTTPAPIEditStream)
+	privat.GET("/pages/player/hls/:uuid/:channel", HTTPAPIPlayHls)
+	privat.GET("/pages/player/mse/:uuid/:channel", HTTPAPIPlayMse)
+	privat.GET("/pages/player/webrtc/:uuid/:channel", HTTPAPIPlayWebrtc)
+	privat.GET("/pages/multiview", HTTPAPIMultiview)
+	privat.Any("/pages/multiview/full", HTTPAPIFullScreenMultiView)
+	privat.GET("/pages/documentation", HTTPAPIServerDocumentation)
+	privat.GET("/pages/player/all/:uuid/:channel", HTTPAPIPlayAll)
+	public.StaticFS("/static", http.Dir(Storage.ServerHTTPDir()+"/static"))
 
 	/*
 		Stream Control elements
@@ -159,13 +162,8 @@ func HTTPAPIServer() {
 }
 
 func HTTPTest(c *gin.Context) {
-	log.Info(c.Query("username"))
-	res, err := getUserByName(c.Query("username"))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": res})
+	log.Info("test")
+	c.JSON(http.StatusOK, gin.H{"data": "OK"})
 }
 
 func HTTPServerLogin(c *gin.Context) {
@@ -177,6 +175,7 @@ func HTTPServerLogin(c *gin.Context) {
 			"streams": Storage.Streams,
 			"version": time.Now().String(),
 			"page":    "login",
+			"error":   "",
 		})
 		return
 	}
@@ -186,7 +185,7 @@ func HTTPServerLogin(c *gin.Context) {
 	// Get request body
 	req, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Cant parse request data"})
+		c.IndentedJSON(http.StatusBadRequest, Message{Status: 400, Payload: "Lỗi khi xử lý yêu cầu"})
 		return
 	}
 
@@ -195,18 +194,79 @@ func HTTPServerLogin(c *gin.Context) {
 	//  Forward the request data to main server
 	res, err := http.DefaultClient.Post(cfg.MainServerEndpoint, "application/json", reader)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to contact main server"})
+		c.IndentedJSON(http.StatusInternalServerError, Message{Status: 500, Payload:"Máy chủ gặp lỗi, vui lòng liên hệ nhà phát triển"})
 		return 
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response from main server"})
+		c.IndentedJSON(http.StatusInternalServerError, Message{Status: 500, Payload:"Thông tin đăng nhập lỗi, vui lòng thử lại"})
 		return
 	}
 
-	c.Data(res.StatusCode, res.Header.Get("Content-Type"), body) 
+	if res.StatusCode != http.StatusOK {
+        log.Info(fmt.Print(res))
+		c.IndentedJSON(http.StatusBadRequest, Message{Status: 401, Payload: "Thông tin đăng nhập không hợp lệ"})
+		return
+	}
+
+    var loginResponse struct {
+        StatusCode int    `json:"statusCode"`
+        Message    string `json:"message"`
+        Data       struct {
+            AccessToken string `json:"accessToken"`
+            UserData    struct {
+                ID        int    `json:"id"`
+                Name      string `json:"name"`
+                Username  string `json:"username"`
+                Role      string `json:"role"`
+                Status    bool   `json:"status"`
+                CreatedAt string `json:"createdAt"`
+                UpdatedAt string `json:"updatedAt"`
+            } `json:"userData"`
+        } `json:"data"`
+    }
+
+    if err := json.Unmarshal(body, &loginResponse); err != nil {
+		log.Error(fmt.Print("error when parsing the json data"))
+		log.Info(fmt.Print(err))
+		c.IndentedJSON(http.StatusInternalServerError, Message{Status: 500, Payload: "Lỗi khi phân tích dữ liệu"})
+        return
+    }
+
+    if loginResponse.StatusCode != http.StatusOK || loginResponse.Data.AccessToken == "" {
+		log.Error(fmt.Print("auth data from server is invalid"))
+		log.Info(fmt.Print(err))
+		c.IndentedJSON(http.StatusBadRequest, Message{Status: 400, Payload: "Thông tin đăng nhập không hợp lệ"})
+        return
+    }
+
+    if loginResponse.Data.UserData.Role != "admin"  {
+		log.Error(fmt.Print("auth data from server is invalid"))
+		log.Info(fmt.Print(err))
+		c.IndentedJSON(http.StatusBadRequest, Message{Status: 400, Payload: "User không có quyền truy cập"})
+        return
+    }
+
+	var store = middleware.GetStore()
+
+	session, _ := store.Get(c.Request, "auth")
+    session.Values["authenticated"] = true
+    session.Values["accessToken"] = loginResponse.Data.AccessToken
+    session.Values["userID"] = loginResponse.Data.UserData.ID
+    session.Values["username"] = loginResponse.Data.UserData.Username
+    session.Values["role"] = loginResponse.Data.UserData.Role
+    session.Values["status"] = loginResponse.Data.UserData.Status
+	session.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   cfg.AuthConfig.TimeoutInSeconds,
+		HttpOnly: false,
+		Secure:   false,
+	}
+	session.Save(c.Request, c.Writer)
+	c.IndentedJSON(http.StatusOK, Message{Status: 200, Payload: "validated"})
+	return
 }
 
 // HTTPAPIServerIndex index file
@@ -352,6 +412,6 @@ func CrossOrigin() gin.HandlerFunc {
 			c.AbortWithStatus(204)
 			return
 		}
-		c.Next()
+		//c.Next()
 	}
 }

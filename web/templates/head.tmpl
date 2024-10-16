@@ -12,6 +12,18 @@
   <link rel="stylesheet" href="/../static/plugins/sweetalert2/sweetalert2.min.css">
   <link rel="stylesheet" href="/../static/css/index.css">
   <link href="/../static/css/google-fonts.css" rel="stylesheet">
+
+  <style>
+    .bottom {
+      position: absolute;
+      left: 4rem;
+      bottom: 0;
+      padding-bottom: 3vh;
+    }
+    .form-check {
+      padding-left: 0;
+    }
+  </style>
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -35,11 +47,9 @@
       </ul>
     </nav>
 
-
-
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <a href="/" class="brand-link d-flex align-items-center justify-content-center">
-        <i class="fas fa-camera nav-icon mr-2"></i>
+      <a href="/" class="brand-link">
+        <img class="brand-image" alt="AdminLTE Logo" src="/../static/img/cam.png" style="opacity: .7">
         <span class="brand-text font-weight-light">Quản lý camera</span>
       </a>
 
@@ -97,6 +107,22 @@
           </ul>
         </nav>
         <!-- /.sidebar-menu -->
+
+        <!-- Logout Button -->
+        <div id="logoutWrapper" class="sidebar-footer bottom">
+          <div class="form-check">
+            <label class="form-check-label">
+              <button id="logoutButton" class="btn btn-danger" onclick="logout()">Đăng xuất</button>
+              <!-- <script>
+                function logout() {
+                  window.location.href = "/login";
+                  document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname + ";";
+                }
+              </script> -->
+            </label>
+          </div>
+        </div>
+        <!-- /.sidebar-footer -->
       </div>
       <!-- /.sidebar -->
     </aside>
@@ -106,3 +132,37 @@
       <!-- Content Header (Page header) -->
 
       <!-- /.content-header -->
+
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script>
+        $(document).ready(function () {
+          function toggleLogoutButton() {
+            if ($('.sidebar-mini').hasClass('sidebar-collapse')) {
+              $('#logoutWrapper').hide();
+            } else {
+              $('#logoutWrapper').show();
+            }
+          }
+
+          $('.main-sidebar').hover(function() {
+            $('#logoutWrapper').show();
+          }, function() {
+            toggleLogoutButton();
+          }); 
+
+          toggleLogoutButton();
+
+          const sidebar = document.querySelector('.sidebar-mini');
+
+          const observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+              if (mutation.attributeName === 'class') {
+                toggleLogoutButton();
+              }
+            });
+          });
+
+          observer.observe(sidebar, { attributes: true });
+        });
+      </script>
+

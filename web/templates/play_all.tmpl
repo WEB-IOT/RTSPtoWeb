@@ -29,6 +29,11 @@
                 <video class="videoPlayer" vtype="hls" id="videoPlayer" autoplay controls muted playsinline></video>
                 <canvas id="canvas" class="d-none"></canvas>
               </div>
+              <div class="stream-link" style="display: flex; justify-content: space-between; align-items: center; padding: 5px;">
+                <span id="hls" style="margin-left: 10px;
+    background-color: ghostwhite;">https://camera.rakuremo.jp/stream/{{.uuid}}/channel/{{.channel}}/hls/live/index.m3u8</span>
+                <button class="btn btn-primary float-right" style="margin-left: 10px;" onclick="copyToClipboard('hls')">Copy Link</button>
+              </div>
               <input type="hidden" id="uuid" value="{{ .uuid }}" />
               <input type="hidden" id="channel" value="{{ .channel }}" />
             </div>
@@ -40,6 +45,11 @@
               </div>
               <div class="card-body p-0">
                 <video class="videoPlayer"  vtype="hlsll" autoplay controls muted playsinline></video>
+              <div class="stream-link" style="display: flex; justify-content: space-between; align-items: center; padding: 5px;">
+                <span id="hlsll" style="margin-left: 10px;
+    background-color: ghostwhite;">https://camera.rakuremo.jp/stream/{{.uuid}}/channel/{{.channel}}/hlsll/live/index.m3u8</span>
+                <button class="btn btn-primary float-right" style="margin-left: 10px;" onclick="copyToClipboard('hlsll')">Copy Link</button>
+              </div>
               </div>
             </div>
           </div>
@@ -51,6 +61,11 @@
               <div class="card-body p-0">
                 <video class="videoPlayer" vtype="mse"  autoplay controls muted playsinline></video>
               </div>
+              <div class="stream-link" style="display: flex; justify-content: space-between; align-items: center; padding: 5px;">
+                <span id="mse" style="margin-left: 10px;
+    background-color: ghostwhite;">https://camera.rakuremo.jp/stream/{{.uuid}}/channel/{{.channel}}/mse</span>
+                <button class="btn btn-primary float-right" style="margin-left: 10px;" onclick="copyToClipboard('mse')">Copy Link</button>
+              </div>
             </div>
           </div>
           <div class="col-12 col-md-6">
@@ -60,6 +75,11 @@
               </div>
               <div class="card-body p-0">
                 <video class="videoPlayer" vtype="webrtc"  autoplay controls muted playsinline></video>
+              <div class="stream-link" style="display: flex; justify-content: space-between; align-items: center; padding: 5px;">
+                <span id="rtc" style="margin-left: 10px;
+    background-color: ghostwhite;">https://camera.rakuremo.jp/stream/{{.uuid}}/channel/{{.channel}}/webrtc</span>
+                <button class="btn btn-primary float-right" style="margin-left: 10px;" onclick="copyToClipboard('rtc')">Copy Link</button>
+              </div>
               </div>
             </div>
           </div>
@@ -149,7 +169,7 @@
                         <a class="btn btn-info btn-flat btn-xs" href="/pages/player/webrtc/{{$key}}/0"><i class="fas fa-play"></i> WebRTC</a>
                         <a class="btn btn-info btn-flat btn-xs" href="/pages/player/all/{{$key}}/0"><i class="fas fa-play"></i> Tất cả</a>
                         {{end}}
-                        <a class="btn btn-secondary btn-flat btn-xs" href="/pages/stream/edit/{{$key}}"><i class="fas fa-edit"></i> CHỉnh sửa</a>
+                        <a class="btn btn-secondary btn-flat btn-xs" href="/pages/stream/edit/{{$key}}"><i class="fas fa-edit"></i> Chỉnh sửa</a>
                         <a class="btn btn-danger btn-flat btn-xs" onclick="deleteStream('{{ $key }}')" href="#"><i class="fas fa-times"></i> Xóa</a>
                     </div>
                   </div>
@@ -554,3 +574,18 @@ let isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && nav
 
 
 </script>
+
+<script>
+  function copyToClipboard(elementId) {
+    var text = document.getElementById(elementId).textContent;
+    navigator.clipboard.writeText(text).then(function() {
+      var button = document.querySelector(`button[onclick*='${elementId}']`);
+      button.textContent = 'Copied';
+      setTimeout(function() {
+        button.textContent = 'Copy';
+      }, 1000);
+    });
+  }
+</script>
+
+
