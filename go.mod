@@ -2,8 +2,6 @@ module github.com/deepch/RTSPtoWeb
 
 go 1.23
 
-toolchain go1.23.2
-
 require (
 	github.com/deepch/vdk v0.0.27
 	github.com/gin-gonic/autotls v1.1.0
